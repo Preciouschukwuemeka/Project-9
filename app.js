@@ -1,73 +1,45 @@
-'use strict';
-
-// load modules
+const createError = require('http-errors');
 const express = require('express');
-const morgan = require('morgan');
-const Sequelize = require('sequelize');
+const path = require('path');
+const logger = require('morgan');
 
-// variable to enable global error logging
-const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const coursesRouter = require('./routes/courses');
 
-// create the Express app
+
 const app = express();
 
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+//app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/courses', coursesRouter);
 
 
-(async () => {
-  try {
-    // Test the connection to the database
-    console.log('Connection to the database successful!');
-    await sequelize.authenticate();
-
-    // Sync the models
-    // console.log('Synchronizing the models with the database...');
-    //force: true completely drops a table and re-creates it afterwards each time you start your app (it's a destructive operation). 
-    // await sequelize.sync({ force: true });
-  } catch(error) {
-    console.log('Connection to the database was unsuccessful!');
-  }
-})();
+// we declare the sequelize and models constiables and initialize them to the sequelize and models objects imported.
+const models = require('./models');
+const sequelize = models.sequelize;
+const { User, Course } = models;
 
 
-
-
-
-
-// setup morgan which gives us http request logging
-app.use(morgan('dev'));
-
-// TODO setup your api routes here
-
-// setup a friendly greeting for the root route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the REST API project!',
-  });
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
 });
 
-// send 404 if no other route matched
-app.use((req, res) => {
-  res.status(404).json({
-    message: 'Route Not Found',
-  });
+// global error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.json(err);
 });
 
-// setup a global error handler
-app.use((err, req, res, next) => {
-  if (enableGlobalErrorLogging) {
-    console.error(`Global error handler: ${JSON.stringify(err.stack)}`);
-  }
-
-  res.status(err.status || 500).json({
-    message: err.message,
-    error: {},
-  });
-});
-
-// set our port
-app.set('port', process.env.PORT || 5000);
-
-// start listening on our port
-const server = app.listen(app.get('port'), () => {
-  console.log(`Express server is listening on port ${server.address().port}`);
-});
+module.exports = app;
