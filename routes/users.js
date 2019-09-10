@@ -34,7 +34,8 @@ router.post('/', [
     .withMessage('Please provide a value for "password"')
     .isLength({ min: 8, max: 20 })
     .withMessage('Please provide a "password" that is between 8 and 20 characters in length')
-], async (req, res, next)=>{
+], 
+  async(req, res, next)=>{
   // Attempt to get the validation result from the Request object.
   const errors = validationResult(req);
 
@@ -45,6 +46,7 @@ router.post('/', [
     
     // Return the validation errors to the client.
     const err = new Error(errorMessages);
+    //err.errors = errorMessages;
     err.status = 400;
     next(err);   
   
