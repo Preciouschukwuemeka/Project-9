@@ -65,7 +65,7 @@ router.post('/', [
     } catch (err) {
       if(err.name === 'SequelizeValidationError') {
         res.status(400).json({message: "Hmm...Something's not right. Please fill out all the required fields."});
-        next();
+        next(err);
       } else {
         res.status(400).json({message: 'Sorry that email address already exists. Try again.'});
       }
@@ -74,3 +74,10 @@ router.post('/', [
   
 });
 module.exports = router;
+
+
+
+
+
+
+
