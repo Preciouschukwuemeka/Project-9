@@ -13,11 +13,13 @@ const app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-//app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/courses', coursesRouter);
+
+
+
 
 
 // we declare the sequelize and models constiables and initialize them to the sequelize and models objects imported.
